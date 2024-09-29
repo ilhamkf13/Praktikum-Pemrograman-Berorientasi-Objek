@@ -72,6 +72,14 @@ class KeranjangBelanja {
         }
     }
 
+    public void tampilkanProduk() {
+        System.out.println("Daftar Produk dalam Keranjang:");
+        for (int i = 0; i < jumlahProduk; i++) {
+            System.out.println((i + 1) + ". " + produkList[i].nama + " - Harga: " + produkList[i].harga);
+        }
+    }
+    
+
     public double hitungTotalHarga() {
         double total = 0.0;
         for (int i = 0; i < jumlahProduk; i++) {
@@ -93,6 +101,8 @@ public class Main {
         keranjang.tambahProduk(buku1);
         keranjang.tambahProduk(elektronik1);
         keranjang.tambahProduk(pakaian1);
+
+        keranjang.tampilkanProduk();
 
         double totalHarga = keranjang.hitungTotalHarga();
         System.out.println("Total harga setelah diskon: " + totalHarga);
