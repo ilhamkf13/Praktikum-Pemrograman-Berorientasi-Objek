@@ -1,11 +1,11 @@
 package Praktikum12;
 
 import java.io.*;
-import java.nio.file.ProviderNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+// Kelas Produk untuk Serialisasi
 class Produk implements Serializable {
     private String namaProduk;
     private double harga;
@@ -18,18 +18,24 @@ class Produk implements Serializable {
     }
 
     public void tampilkanInfo() {
-        System.out.println("Nama Produk: " + namaProduk);
-        System.out.println("Harga: " + harga);
-        System.out.println("Stok: " + stok);
+        System.out.println("Nama Produk: " + namaProduk + ", Harga: " + harga + ", Stok: " + stok);
+    }
+
+    @Override
+    public String toString() {
+        return "Nama Produk: " + namaProduk + ", Harga: " + harga + ", Stok: " + stok;
     }
 }
 
 public class InventorySystem {
     private static final String TEXT_FILE = "produk.txt";
     private static final String SERIAL_FILE = "produk.ser";
-    public static list <Produk> produkList = new ArrayList<>();
+    private static List<Produk> produkList = new ArrayList<>();
 
     public static void main(String[] args) {
+        // Memuat data dari file serialisasi saat program dimulai
+        muatDariFileSerial();
+
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("\nMenu:");
@@ -40,18 +46,19 @@ public class InventorySystem {
             System.out.println("5. Keluar");
             System.out.print("Pilihan: ");
             int pilihan = scanner.nextInt();
-            scanner.nextLine(); 
+            scanner.nextLine(); // Membersihkan buffer setelah nextInt()
+
             switch (pilihan) {
-                case 1 -> tambahProduk(scanner);
-                case 2 -> simpanKeFileTeks();
-                case 3 -> simpanKeFileSerial();
-                case 4 -> tampilkanProduk();
-                case 5 -> {
+                case 1 : tambahProduk(scanner);
+                case 2 : simpanKeFileTeks();
+                case 3 : simpanKeFileSerial();
+                case 4 : tampilkanProduk();
+                case 5 : {
                     System.out.println("Keluar dari sistem.");
                     scanner.close();
                     return;
                 }
-                default -> System.out.println("Pilihan tidak valid.");
+                default : System.out.println("Pilihan tidak valid.");
             }
         }
     }
@@ -63,6 +70,7 @@ public class InventorySystem {
         double harga = scanner.nextDouble();
         System.out.print("Masukkan stok: ");
         int stok = scanner.nextInt();
+        scanner.nextLine(); // Membersihkan buffer
 
         produkList.add(new Produk(nama, harga, stok));
         System.out.println("Produk berhasil ditambahkan.");
@@ -73,29 +81,43 @@ public class InventorySystem {
             for (Produk produk : produkList) {
                 writer.write(produk.toString() + "\n");
             }
-            System.out.println("Data produk berhasil disimpan ke file: " + TEXT_FILE);
-        } 
-        catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menulis data ke file: ");
-                    e.printStackTrace();
-                }
-            }
+            System.out.println("Data produk berhasil disimpan ke file teks: " + TEXT_FILE);
+        } catch (IOException e) {
+            System.out.println("Terjadi kesalahan saat menyimpan ke file teks.");
+            e.printStackTrace();
         }
-        
+    }
+
     private static void simpanKeFileSerial() {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(SERIAL_FILE))) {
             oos.writeObject(produkList);
-            System.out.println("Objek produk berhasil disimpan ke file: " + SERIAL_FILE);
-        } 
-        catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menyimpan objek: ");
+            System.out.println("Objek produk berhasil disimpan ke file serial: " + SERIAL_FILE);
+        } catch (IOException e) {
+            System.out.println("Terjadi kesalahan saat menyimpan ke file serial.");
             e.printStackTrace();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void muatDariFileSerial() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(SERIAL_FILE))) {
+            produkList = (List<Produk>) ois.readObject();
+            System.out.println("Data produk berhasil dimuat dari file serial.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Tidak ada data produk sebelumnya atau file tidak ditemukan.");
+        }
+    }
 
     private static void tampilkanProduk() {
+        if (produkList.isEmpty()) {
+            System.out.println("Tidak ada produk yang tersedia.");
+            return;
+        }
+
         System.out.println("Daftar Produk:");
         for (Produk produk : produkList) {
             produk.tampilkanInfo();
+            System.out.println("----------------------");
         }
     }
 }
